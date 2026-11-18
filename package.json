@@ -1,0 +1,8 @@
+{
+  "name": "escape-room-ghiba",
+  "version": "2.0.0",
+  "description": "غرفة الهروب - آفة اللسان: الغيبة (Node.js بدون مكتبات)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=14" }
+}

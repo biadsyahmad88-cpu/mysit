@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>غرفة الهروب — شاشة المعلم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#ffcf5a;--gold2:#ff9d00;--bg1:#1b1030;--bg2:#07040d;--card:rgba(255,255,255,.055);--line:rgba(255,207,90,.22);--txt:#f5ecd9;--mute:#a99cc4;--green:#3ddc84;--red:#ff5d6c}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Cairo,Tahoma,Arial,sans-serif;background:radial-gradient(ellipse at top,#34205a 0%,var(--bg1) 40%,var(--bg2) 100%) fixed;color:var(--txt);overflow-x:hidden}
+#stars{position:fixed;inset:0;z-index:-1;pointer-events:none}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 26px;gap:16px;flex-wrap:wrap}
+.title{display:flex;align-items:center;gap:14px}
+.logo{font-size:3rem;filter:drop-shadow(0 0 14px var(--gold2));animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-6px)}}
+h1{font-size:2rem;font-weight:900;background:linear-gradient(90deg,#fff3c4,var(--gold),var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.2}
+.subtitle{color:var(--mute);font-size:1rem}
+.hright{display:flex;align-items:center;gap:12px}
+.phase{padding:8px 18px;border-radius:30px;font-weight:700;border:1px solid var(--line);background:var(--card)}
+.phase.lobby{color:var(--gold)} .phase.playing{color:var(--green);border-color:var(--green)} .phase.ended{color:var(--red);border-color:var(--red)}
+.timer{font-family:"Courier New",monospace;font-size:2.6rem;font-weight:900;color:#fff;text-shadow:0 0 18px rgba(255,207,90,.6);min-width:150px;text-align:center}
+.timer.low{color:var(--red);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.4}}
+.ibtn{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:#fff;font-size:1.3rem;cursor:pointer}
+.ibtn:hover{background:rgba(255,207,90,.15)}
+main{display:grid;grid-template-columns:360px 1fr 340px;gap:18px;padding:0 26px 20px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;backdrop-filter:blur(6px);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.card h3{font-size:1.1rem;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.qrbox{background:#fff;border-radius:18px;padding:14px;position:relative;box-shadow:0 0 0 4px rgba(255,207,90,.35),0 0 40px rgba(255,207,90,.25)}
+#qr{width:100%;display:block;aspect-ratio:1;image-rendering:pixelated}
+.qrfail{display:none;color:#333;text-align:center;padding:40px 10px;font-weight:700}
+.scan{text-align:center;margin-top:12px;font-size:1.05rem;color:var(--mute)}
+.url{direction:ltr;text-align:center;font-size:1.45rem;font-weight:900;color:var(--gold);word-break:break-all;margin-top:4px;cursor:pointer}
+.url small{display:block;font-size:.8rem;color:var(--mute);font-weight:400}
+.count{display:flex;justify-content:space-around;margin-top:14px;text-align:center}
+.count b{display:block;font-size:2rem;color:#fff;line-height:1}
+.count span{color:var(--mute);font-size:.85rem}
+.lbl{color:var(--mute);font-size:.9rem;margin:14px 0 6px}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;padding:10px 0;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:#fff;font-family:inherit;font-size:1.05rem;font-weight:700;cursor:pointer;transition:.2s}
+.seg button.on{background:linear-gradient(var(--gold),var(--gold2));color:#2a1700;border-color:transparent;box-shadow:0 0 16px rgba(255,170,0,.45)}
+.seg button:disabled{opacity:.45;cursor:not-allowed}
+.big{width:100%;padding:15px;border:0;border-radius:14px;font-family:inherit;font-size:1.25rem;font-weight:900;cursor:pointer;margin-top:12px;transition:.2s}
+.big:hover{transform:translateY(-2px)}
+.start{background:linear-gradient(135deg,#3ddc84,#169a52);color:#fff;box-shadow:0 8px 24px rgba(61,220,132,.35)}
+.endb{background:linear-gradient(135deg,#ff7a59,#d9363e);color:#fff}
+.reset{background:rgba(255,255,255,.08);color:#fff;border:1px solid var(--line)}
+.big:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.team{border-radius:20px;padding:14px;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:2px solid var(--c);position:relative;overflow:hidden;animation:pop .4s}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+.team::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 90% 0%,var(--c),transparent 55%);opacity:.18;pointer-events:none}
+.team.win{box-shadow:0 0 30px var(--c)}
+.thead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.emb-anim{animation:float 2s infinite}
+.temoji{font-size:2rem;width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3);border:1px solid var(--c)}
+.tname{font-weight:900;font-size:1.2rem;flex:1}
+.tname small{display:block;color:var(--mute);font-weight:400;font-size:.8rem}
+.rankb{font-size:2rem}
+.tdel{background:none;border:0;color:var(--mute);cursor:pointer;font-size:1.1rem}
+.members{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:30px}
+.chip{background:rgba(0,0,0,.35);border-radius:20px;padding:3px 10px 3px 4px;font-size:.9rem;display:flex;align-items:center;gap:5px;border:1px solid rgba(255,255,255,.08)}
+.chip .x{cursor:pointer;color:var(--red);font-weight:900;margin-right:2px;opacity:.6}
+.chip .x:hover{opacity:1}
+.chip.off{opacity:.45}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.chip.off .dot{background:#777}
+.slot{border:1px dashed rgba(255,255,255,.2);border-radius:20px;padding:3px 12px;font-size:.85rem;color:var(--mute)}
+.track{display:flex;align-items:flex-end;gap:6px;justify-content:center;padding:8px 0}
+.tdoor{width:42px;height:56px;border-radius:10px 10px 3px 3px;background:linear-gradient(#5a3820,#3a2312);border:3px solid #8a5a2b;position:relative;transition:.5s}
+.tdoor::after{content:"";position:absolute;left:6px;top:26px;width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.tdoor.half{border-color:var(--gold)}
+.tdoor.half{animation:tglow 1s infinite}
+@keyframes tglow{50%{box-shadow:0 0 14px var(--gold)}}
+.tdoor .dn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#c9a27a;font-size:1rem}
+.tdoor.open{background:linear-gradient(#3ddc84,#178a4c)!important;border-color:#fff!important}
+.tdoor.open span{color:#fff!important;font-size:1.5rem!important;text-shadow:0 0 8px #000}
+.qdots{display:flex;gap:4px;justify-content:center;margin-top:4px}
+.qdots i{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid rgba(255,207,90,.3)}
+.qdots i.ok{background:var(--green);border-color:#fff}
+.qdots i.cur{border-color:var(--gold);animation:tglow 1s infinite}
+.tdoor.open{background:linear-gradient(var(--gold),#c98a00);border-color:#fff;box-shadow:0 0 14px var(--gold)}
+.tdoor.open::after{display:none}
+.tdoor span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;color:#2a1700;font-size:1.2rem}
+.tsafe{font-size:2.2rem;filter:grayscale(1) brightness(.6);transition:.4s;margin-right:4px}
+.tsafe.active{filter:none;animation:float 1.2s infinite}
+.tsafe.done{filter:drop-shadow(0 0 10px var(--gold))}
+.tstats{display:flex;justify-content:space-between;font-size:.9rem;color:var(--mute);border-top:1px solid rgba(255,255,255,.07);padding-top:8px}
+.tstats b{color:#fff}
+.empty{text-align:center;color:var(--mute);padding:40px 10px;font-size:1.1rem;grid-column:1/-1}
+.empty .e{font-size:3.5rem;display:block;margin-bottom:8px;animation:float 2.5s infinite}
+.unassigned{margin-bottom:14px}
+.chat{height:calc(100vh - 290px);min-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-left:4px}
+.chat::-webkit-scrollbar{width:6px}.chat::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
+.msg{background:rgba(0,0,0,.28);border-radius:12px;padding:7px 10px;font-size:.92rem;line-height:1.5;animation:pop .25s;border-right:3px solid var(--c,#666)}
+.msg .who{font-weight:700;color:var(--c,#fff);font-size:.82rem}
+.msg .sc{background:rgba(255,255,255,.1);border-radius:6px;padding:0 6px;font-size:.72rem;color:var(--mute);margin-right:4px}
+.msg.sys{background:rgba(255,207,90,.08);border-right-color:var(--gold);color:var(--gold);font-size:.85rem;text-align:center}
+.msg.t{background:rgba(61,220,132,.12);border-right-color:var(--green)}
+.ann{display:flex;gap:6px;margin-top:10px}
+.ann input{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:#fff;font-family:inherit;font-size:.95rem}
+.ann button{padding:0 14px;border-radius:10px;border:0;background:var(--gold);color:#2a1700;font-weight:900;cursor:pointer;font-family:inherit}
+#podium{position:fixed;inset:0;background:rgba(5,2,12,.92);z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+#podium.show{display:flex}
+#podium h2{font-size:3rem;font-weight:900;color:var(--gold);text-shadow:0 0 30px var(--gold2);margin-bottom:30px}
+.pods{display:flex;align-items:flex-end;gap:18px;margin-bottom:18px}
+#podium{overflow:auto;justify-content:flex-start!important;padding-top:30px!important}
+.pod{width:200px;text-align:center;animation:rise .8s backwards}
+.pod .pe{font-size:3.5rem}
+.pod .pn{font-weight:900;font-size:1.3rem;margin:4px 0}
+.pod .pm{color:var(--mute);font-size:.85rem;min-height:40px}
+.pod .bar{border-radius:16px 16px 0 0;display:flex;align-items:flex-start;justify-content:center;font-size:3rem;padding-top:10px;font-weight:900}
+.p1 .bar{height:170px;background:linear-gradient(#ffe27a,#d99a00)} .p2 .bar{height:120px;background:linear-gradient(#e5e9f0,#8d99ae)} .p3 .bar{height:85px;background:linear-gradient(#f0a868,#a0522d)}
+.p1{animation-delay:.6s}.p2{animation-delay:.3s}.p3{animation-delay:0s}
+@keyframes rise{from{transform:translateY(120px);opacity:0}}
+.rest{max-width:1100px;width:100%;color:var(--txt);max-height:38vh;overflow:auto;margin-bottom:10px}
+.pscore{font-size:1.4rem;font-weight:900;color:var(--gold);text-shadow:0 0 12px var(--gold2)}
+.rtable{width:100%;border-collapse:collapse;font-size:1rem}
+.rtable th{color:var(--gold);padding:8px;border-bottom:2px solid var(--line);position:sticky;top:0;background:#120a20}
+.rtable td{padding:7px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06)}
+.rtable tr{border-right:4px solid var(--c)}
+.rtable .tn{display:flex;align-items:center;gap:8px;font-weight:900;text-align:right}
+.rtable .rk{font-size:1.5rem;font-weight:900}
+.rtable .pl{color:var(--green)} .rtable .mn{color:var(--red)}
+.rtable .tot{font-size:1.3rem;font-weight:900;color:var(--gold)}
+.rules{color:var(--mute);font-size:.85rem;text-align:center;margin-top:8px}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--gold),var(--gold2));color:#2a1700;padding:14px 26px;border-radius:16px;font-weight:900;font-size:1.3rem;z-index:70;box-shadow:0 10px 40px rgba(0,0,0,.5);animation:tin .4s}
+@keyframes tin{from{transform:translate(-50%,-80px)}}
+.credits{text-align:center;color:var(--mute);padding:6px 0 16px;font-size:1.15rem}
+.codeShow{font-family:monospace;letter-spacing:3px;color:var(--gold);filter:blur(5px);cursor:pointer;transition:.2s}
+.codeShow:hover{filter:none}
+@media(max-width:1200px){main{grid-template-columns:1fr 1fr}.chatcol{grid-column:1/-1}.chat{height:300px}}
+@media(max-width:760px){main{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<canvas id="confetti"></canvas>
+
+<header>
+  <div class="title">
+    <div class="logo">🔐</div>
+    <div>
+      <h1>غرفة الهروب: آفة اللسان</h1>
+      <div class="subtitle">تقديم: سراج وآلاء — 8 أسئلة ← اختاروا الأبواب ← اجمعوا الأرقام ← افتحوا الخزنة!</div>
+    </div>
+  </div>
+  <div class="hright">
+    <div class="phase lobby" id="phase">⏳ قاعة الانتظار</div>
+    <div class="timer" id="timer">00:00</div>
+    <button class="ibtn" id="soundBtn" title="الصوت">🔊</button>
+    <button class="ibtn" id="fsBtn" title="ملء الشاشة">⛶</button>
+  </div>
+</header>
+
+<main>
+  <!-- العمود الأول: الباركود والإعدادات -->
+  <section class="card">
+    <h3>📱 انضموا من التلفون</h3>
+    <div class="seg" id="linkTabs" style="margin-bottom:10px"></div>
+    <div class="qrbox"><img id="qr" alt="QR"><div class="qrfail" id="qrfail">تعذّر تحميل الباركود (لا يوجد إنترنت)<br>ادخلوا الرابط بالأسفل</div></div>
+    <div class="scan" id="linkHint">امسح الباركود أو اكتب الرابط:</div>
+    <div class="url" id="url" title="اضغط للنسخ"></div>
+    <div class="count">
+      <div><b id="cPlayers">0</b><span>طالب</span></div>
+      <div><b id="cTeams">0</b><span>مجموعة</span></div>
+      <div><b id="cWin">0</b><span>هربوا</span></div>
+    </div>
+
+    <div class="lbl">👥 عدد الطلاب في كل مجموعة</div>
+    <div class="seg" id="teamSize">
+      <button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button>
+    </div>
+    <div class="lbl">⏱️ وقت اللعبة</div>
+    <div class="seg" id="timeLimit">
+      <button data-v="0">بدون</button><button data-v="10">10 د</button><button data-v="15">15 د</button><button data-v="20">20 د</button><button data-v="30">30 د</button>
+    </div>
+
+    <button class="big start" id="startBtn">▶ ابدأ اللعبة</button>
+    <button class="big endb" id="endBtn" style="display:none">⏹ إنهاء اللعبة</button>
+    <button class="big reset" id="resetBtn">↻ لعبة جديدة</button>
+    <button class="big reset" id="podiumBtn" style="display:none">🏆 عرض النتائج</button>
+  </section>
+
+  <!-- العمود الثاني: المجموعات -->
+  <section class="card">
+    <h3>🏰 المجموعات</h3>
+    <div id="unassigned" class="unassigned"></div>
+    <div class="teams" id="teams"></div>
+  </section>
+
+  <!-- العمود الثالث: الدردشة -->
+  <section class="card chatcol">
+    <h3>💬 الدردشة المباشرة</h3>
+    <div class="chat" id="chat"></div>
+    <div class="ann"><input id="annText" placeholder="رسالة من المعلم لكل الطلاب..." maxlength="200"><button id="annBtn">إرسال</button></div>
+  </section>
+</main>
+<div class="credits">✨ تقديم: <b style="color:var(--gold)">سراج قبوعة</b> و <b style="color:var(--gold)">آلاء بيادسة</b> ✨</div>
+
+<div id="podium">
+  <h2>🏆 النتائج النهائية 🏆</h2>
+  <div class="pods" id="pods"></div>
+  <div class="rest" id="rest"></div>
+  <button class="big reset" style="max-width:300px" onclick="document.getElementById('podium').classList.remove('show')">إغلاق</button>
+</div>
+
+<script src="/emblem.js"></script>
+<script>
+const KEY = "__KEY__";
+const $ = s => document.getElementById(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const fmt = s => { s = Math.max(0, Math.floor(s)); return String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0"); };
+let linkKey = "", linkPicked = false;
+let S = null, offset = 0, qrUrl = "", lastMsg = 0, prevRanks = {}, prevPhase = "", sound = true, firstLoad = true;
+
+// ======== أصوات ========
+let AC;
+function tone(freqs, dur = .12, type = "sine", vol = .15) {
+  if (!sound) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    freqs.forEach((f, i) => {
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = type; o.frequency.value = f; o.connect(g); g.connect(AC.destination);
+      const t = AC.currentTime + i * dur;
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur * 1.6);
+      o.start(t); o.stop(t + dur * 1.7);
+    });
+  } catch (e) {}
+}
+const sfx = { join: () => tone([660, 880], .08), win: () => tone([523, 659, 784, 1046, 1318], .13, "triangle", .2), start: () => tone([392, 523, 659, 784], .15, "square", .08), msg: () => tone([900], .05, "sine", .05) };
+
+// ======== اتصال ========
+let tPoll = null, tGot = false;
+function apply(d) { S = d; offset = Date.now() - S.now; render(); }
+function connect() {
+  const es = new EventSource("/events?role=teacher&key=" + KEY);
+  es.onmessage = e => { tGot = true; apply(JSON.parse(e.data)); };
+  es.onerror = () => { if (!tGot) { es.close(); startTPoll(); } };
+  setTimeout(() => { if (!tGot) { es.close(); startTPoll(); } }, 4000);
+}
+function startTPoll() { if (tPoll) return; tPoll = setInterval(tload, 1500); tload(); }
+async function tload() { try { apply(await (await fetch("/api/tstate?key=" + KEY)).json()); } catch (e) {} }
+async function act(type, extra = {}) {
+  const r = await (await fetch("/api/teacher", { method: "POST", body: JSON.stringify({ key: KEY, type, ...extra }) })).json();
+  if (r.error) toast(r.error);
+  if (tPoll) tload();
+}
+
+function toast(t) {
+  const d = document.createElement("div"); d.className = "toast"; d.textContent = t;
+  document.body.appendChild(d); setTimeout(() => d.remove(), 3200);
+}
+
+// ======== رسم ========
+function render() {
+  if (!S) return;
+  const links = [
+    ...(S.onlineUrl ? [{ k: "on", u: S.onlineUrl, l: "🌍 أونلاين", h: "🌍 يشتغل من أي إنترنت (واي فاي أو بيانات الهاتف)" }] : []),
+    ...S.lanUrls.map((u, i) => ({ k: "lan" + i, u, l: "📶 واي فاي" + (S.lanUrls.length > 1 ? " " + (i + 1) : ""), h: "📶 لازم التلفون يكون على نفس الواي فاي" + (S.lanUrls.length > 1 ? " — إذا ما اشتغل جرّب رقم ثاني" : "") }))
+  ];
+  if (!linkPicked || !links.find(x => x.k === linkKey)) linkKey = links[0].k;
+  const cur = links.find(x => x.k === linkKey);
+  $("linkTabs").innerHTML = links.length > 1 ? links.map(x => `<button class="${x.k === linkKey ? "on" : ""}" onclick="linkKey='${x.k}';linkPicked=true;render()">${x.l}</button>`).join("") : "";
+  $("linkHint").textContent = cur.h;
+  if (cur.u !== qrUrl) {
+    qrUrl = cur.u;
+    const img = $("qr"); img.style.display = ""; $("qrfail").style.display = "none"; delete img.dataset.f;
+    img.onerror = () => {
+      if (!img.dataset.f) { img.dataset.f = 1; img.src = "https://quickchart.io/qr?size=500&margin=1&text=" + encodeURIComponent(qrUrl); }
+      else { img.style.display = "none"; $("qrfail").style.display = "block"; }
+    };
+    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=500x500&margin=4&data=" + encodeURIComponent(qrUrl);
+    $("url").textContent = qrUrl.replace(/^https?:\/\//, "");
+  }
+
+  // المرحلة
+  const ph = { lobby: "⏳ قاعة الانتظار", playing: "🎮 اللعبة جارية", ended: "🏁 انتهت اللعبة" };
+  $("phase").className = "phase " + S.phase; $("phase").textContent = ph[S.phase];
+  if (prevPhase && prevPhase !== S.phase) {
+    if (S.phase === "playing") sfx.start();
+    if (S.phase === "ended") { showPodium(); confetti(); sfx.win(); }
+  }
+  prevPhase = S.phase;
+
+  $("startBtn").style.display = S.phase === "lobby" ? "" : "none";
+  $("endBtn").style.display = S.phase === "playing" ? "" : "none";
+  $("podiumBtn").style.display = S.phase === "ended" ? "" : "none";
+  document.querySelectorAll("#teamSize button").forEach(b => { b.classList.toggle("on", +b.dataset.v === S.settings.teamSize); b.disabled = S.phase !== "lobby"; });
+  document.querySelectorAll("#timeLimit button").forEach(b => { b.classList.toggle("on", +b.dataset.v === S.settings.timeLimit); b.disabled = S.phase !== "lobby"; });
+
+  $("cPlayers").textContent = S.playerCount;
+  $("cTeams").textContent = S.teams.length;
+  $("cWin").textContent = S.teams.filter(t => t.finished).length;
+
+  // طلاب بدون مجموعة
+  $("unassigned").innerHTML = S.unassigned.length ? `<div class="lbl">🙋 بدون مجموعة (سيتم توزيعهم تلقائياً عند البدء):</div><div class="members">${S.unassigned.map(chip).join("")}</div>` : "";
+
+  // المجموعات
+  if (!S.teams.length) {
+    $("teams").innerHTML = `<div class="empty"><span class="e">📲</span>بانتظار انضمام الطلاب...<br>امسحوا الباركود للدخول</div>`;
+  } else {
+    $("teams").innerHTML = S.teams.map(t => {
+      const medal = ["", "🥇", "🥈", "🥉"][t.rank] || (t.rank ? "#" + t.rank : "");
+      const slots = S.phase === "lobby" ? Math.max(0, S.settings.teamSize - t.members.length) : 0;
+      let doors = "";
+      let dots = `<div class="qdots">${Array.from({ length: S.quizQ }, (_, i) => `<i class="${i < t.quiz ? "ok" : i === t.quiz && t.stage === "quiz" ? "cur" : ""}"></i>`).join("")}</div>`;
+      for (let i = 0; i < S.doors; i++) {
+        const done = t.doorsDone[i], act = t.active === i;
+        doors += `<div class="tdoor ${done ? "open" : act ? "half" : ""}">${done ? `<span>${t.code[i]}</span>` : `<b class="dn">${i + 1}</b>`}</div>`;
+      }
+      return `<div class="team ${t.finished ? "win" : ""}" style="--c:${t.color}">
+        <div class="thead">${emblem(t.shape, t.color, t.emoji, 60)}
+          <div class="tname">${esc(t.name)}<small>${t.members.length}/${S.settings.teamSize} طلاب ${S.phase !== "lobby" ? "· الكود: <span class='codeShow'>" + t.code.join("") + "</span>" : ""}</small></div>
+          ${medal ? `<div class="rankb">${medal}</div>` : ""}
+          ${S.phase === "lobby" ? `<button class="tdel" title="حذف المجموعة" onclick="act('deleteTeam',{teamId:'${t.id}'})">🗑</button>` : ""}
+        </div>
+        <div class="members">${t.members.map(chip).join("")}${"<span class='slot'>مكان فارغ</span>".repeat(slots)}</div>
+        ${S.phase !== "lobby" ? `${dots}<div class="track">${doors}<div class="tsafe ${t.finished ? "done" : t.atSafe ? "active" : ""}">${t.finished ? "💰" : "🔐"}</div></div>
+        <div class="tstats"><span>❌ أخطاء: <b>${t.mistakes}</b></span><span>💡 تلميحات: <b>${t.hints}</b></span><span>⏱ <b>${fmt(t.time)}</b></span><span>⭐ <b>${t.score.total}</b></span></div>` : ""}
+      </div>`;
+    }).join("");
+  }
+  // إشعارات الفوز
+  S.teams.forEach(t => { if (t.finished && !prevRanks[t.id] && !firstLoad) { toast(`🔓 ${t.emoji} ${t.name} فتحت الخزنة!`); sfx.win(); if (S.phase === "playing" && S.teams.every(x => x.finished)) setTimeout(() => toast("✅ كل الفرق خلصت — اضغط ⏹ إنهاء اللعبة لعرض النتائج"), 3400); } prevRanks[t.id] = t.finished; });
+
+  // الدردشة
+  const box = $("chat"), atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+  const newest = S.chat.length ? S.chat[S.chat.length - 1].id : 0;
+  if (newest !== lastMsg) {
+    if (lastMsg && !firstLoad) { const m = S.chat[S.chat.length - 1]; m.system ? (m.text.includes("انضم") ? sfx.join() : 0) : sfx.msg(); }
+    lastMsg = newest;
+    box.innerHTML = S.chat.map(m => m.system
+      ? `<div class="msg sys">${esc(m.text)}</div>`
+      : `<div class="msg ${m.teacher ? "t" : ""}" style="--c:${m.color || "#3ddc84"}"><div class="who">${esc(m.avatar)} ${esc(m.name)} ${m.team ? `· ${esc(m.team)}` : ""}${m.scopeName ? `<span class="sc">🔒 دردشة المجموعة</span>` : ""}</div>${esc(m.text)}</div>`).join("");
+    if (atBottom || firstLoad) box.scrollTop = box.scrollHeight;
+  }
+  firstLoad = false;
+}
+
+function chip(p) {
+  return `<span class="chip ${p.online ? "" : "off"}"><span class="dot"></span>${esc(p.avatar)} ${esc(p.name)}<span class="x" title="طرد" onclick="if(confirm('طرد ${esc(p.name)}؟'))act('kick',{pid:'${p.id}'})">×</span></span>`;
+}
+
+function showPodium() {
+  const ts = S.teams;
+  const order = [ts[1], ts[0], ts[2]];
+  const status = t => t.finished ? "🔓 فتحوا الخزنة" : (t.stage === "quiz" ? "❓ " + t.quiz + "/8 أسئلة" : "🚪 " + t.doors + "/4 أبواب");
+  $("pods").innerHTML = order.map((t, i) => {
+    if (!t) return "";
+    const place = [2, 1, 3][i];
+    return `<div class="pod p${place}"><div class="pe">${emblem(t.shape, t.color, t.emoji, place === 1 ? 110 : 85)}</div><div class="pn" style="color:${t.color}">${esc(t.name)}</div>
+      <div class="pscore">⭐ ${t.score.total} نقطة</div>
+      <div class="pm">${t.members.map(m => esc(m.avatar + " " + m.name)).join("، ")}<br>⏱ ${fmt(t.time)} · ❌ ${t.mistakes}</div>
+      <div class="bar">${["", "🥇", "🥈", "🥉"][place]}</div></div>`;
+  }).join("");
+  $("rest").innerHTML = `<table class="rtable"><thead><tr><th>#</th><th>الفرقة</th><th>الحالة</th><th>⏱ الوقت</th><th>❓ أسئلة</th><th>🚪 أبواب</th><th>🔐 خزنة</th><th>⚡ سرعة</th><th>❌ أخطاء</th><th>💡 تلميح</th><th>⭐ المجموع</th></tr></thead><tbody>${ts.map(t => `
+    <tr style="--c:${t.color}"><td class="rk">${["", "🥇", "🥈", "🥉"][t.rank] || t.rank}</td>
+    <td class="tn">${emblem(t.shape, t.color, t.emoji, 28)} ${esc(t.name)}</td><td>${status(t)}</td><td>${fmt(t.time)}</td>
+    <td class="pl">+${t.score.quiz}</td><td class="pl">+${t.score.doors}</td><td class="pl">+${t.score.safe}</td><td class="pl">+${t.score.speed}</td>
+    <td class="mn">−${t.score.mist}</td><td class="mn">−${t.score.hint}</td><td class="tot">${t.score.total}</td></tr>`).join("")}</tbody></table>
+    <div class="rules">النقاط: كل سؤال +10 · كل باب +25 · فتح الخزنة +100 · سرعة حتى +300 (كل ما أسرع أكثر) · كل خطأ −15 · كل تلميح −20</div>`;
+  $("podium").classList.add("show");
+}
+
+// ======== المؤقت ========
+setInterval(() => {
+  if (!S) return;
+  let el = 0;
+  if (S.phase === "playing") el = (Date.now() - offset - S.startTime) / 1000;
+  else if (S.phase === "ended") el = (S.endTime - S.startTime) / 1000;
+  const lim = S.settings.timeLimit * 60;
+  const show = lim && S.phase !== "lobby" ? lim - el : el;
+  $("timer").textContent = fmt(show);
+  $("timer").classList.toggle("low", !!(lim && S.phase === "playing" && lim - el < 60));
+}, 250);
+
+// ======== أزرار ========
+document.querySelectorAll("#teamSize button").forEach(b => b.onclick = () => act("settings", { teamSize: +b.dataset.v }));
+document.querySelectorAll("#timeLimit button").forEach(b => b.onclick = () => act("settings", { timeLimit: +b.dataset.v }));
+$("startBtn").onclick = () => act("start");
+$("endBtn").onclick = () => { if (confirm("إنهاء اللعبة الآن؟")) act("end"); };
+$("resetBtn").onclick = () => { if (confirm("بدء لعبة جديدة؟ سيتم حذف كل الطلاب والمجموعات")) { $("podium").classList.remove("show"); prevRanks = {}; act("reset"); } };
+$("podiumBtn").onclick = showPodium;
+$("annBtn").onclick = () => { const v = $("annText").value.trim(); if (v) { act("announce", { text: v }); $("annText").value = ""; } };
+$("annText").onkeydown = e => { if (e.key === "Enter") $("annBtn").click(); };
+$("soundBtn").onclick = () => { sound = !sound; $("soundBtn").textContent = sound ? "🔊" : "🔇"; };
+$("fsBtn").onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+$("url").onclick = () => navigator.clipboard && navigator.clipboard.writeText(qrUrl).then(() => toast("✔ تم نسخ الرابط"));
+
+// ======== خلفية نجوم ========
+(function stars() {
+  const c = $("stars"), x = c.getContext("2d"); let W, H, st;
+  const rs = () => { W = c.width = innerWidth; H = c.height = innerHeight; st = Array.from({ length: 120 }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.6, s: Math.random() * .3 + .05, a: Math.random() })); };
+  rs(); addEventListener("resize", rs);
+  (function loop() {
+    x.clearRect(0, 0, W, H);
+    st.forEach(s => { s.y -= s.s; if (s.y < 0) s.y = H; s.a += .02; x.globalAlpha = .4 + Math.sin(s.a) * .3; x.fillStyle = "#ffe9b0"; x.beginPath(); x.arc(s.x, s.y, s.r, 0, 7); x.fill(); });
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ======== قصاصات احتفال ========
+function confetti() {
+  const c = $("confetti"), x = c.getContext("2d");
+  c.width = innerWidth; c.height = innerHeight;
+  const cols = ["#ffcf5a", "#ff6b6b", "#4ecdc4", "#a78bfa", "#3ddc84", "#fff"];
+  const ps = Array.from({ length: 220 }, () => ({ x: Math.random() * c.width, y: -20 - Math.random() * c.height * .5, vx: (Math.random() - .5) * 4, vy: Math.random() * 3 + 2, r: Math.random() * 7 + 4, c: cols[Math.floor(Math.random() * cols.length)], a: Math.random() * 6, va: (Math.random() - .5) * .3 }));
+  let f = 0;
+  (function loop() {
+    x.clearRect(0, 0, c.width, c.height);
+    ps.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += .04; p.a += p.va; x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2); x.restore(); });
+    if (++f < 300) requestAnimationFrame(loop); else x.clearRect(0, 0, c.width, c.height);
+  })();
+}
+
+connect();
+</script>
+</body>
+</html>
